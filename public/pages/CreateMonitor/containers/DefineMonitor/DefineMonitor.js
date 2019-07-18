@@ -30,6 +30,9 @@ import { formikToMonitor } from '../CreateMonitor/utils/formikToMonitor';
 import { getPathsPerDataType } from './utils/mappings';
 import { buildSearchRequest } from './utils/searchRequests';
 import { SEARCH_TYPE } from '../../../../utils/constants';
+import HTTPInput from '../../components/HTTPInput';
+import CustomWebhook from '../../../Destinations/components/createDestinations/CustomWebhook';
+import { URL_TYPE } from '../../../Destinations/containers/CreateDestination/utils/constants';
 
 function renderEmptyMessage(message) {
   return (
@@ -260,9 +263,10 @@ class DefineMonitor extends Component {
         actions={actions}
       >
         <MonitorDefinition resetResponse={this.resetResponse} />
-        <MonitorIndex httpClient={httpClient} />
+        {searchType === SEARCH_TYPE.HTTP && <HTTPInput />}
+        {!(searchType === SEARCH_TYPE.HTTP) && <MonitorIndex httpClient={httpClient} />}
         {isGraph && <MonitorTimeField dataTypes={dataTypes} />}
-        <div style={{ padding: '0px 10px' }}>{content}</div>
+        {!(searchType === SEARCH_TYPE.HTTP) && <div style={{ padding: '0px 10px' }}>{content}</div>}
         <EuiSpacer size="m" />
         <QueryPerformance response={performanceResponse} />
       </ContentPanel>
