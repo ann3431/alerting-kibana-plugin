@@ -31,8 +31,6 @@ import { getPathsPerDataType } from './utils/mappings';
 import { buildSearchRequest } from './utils/searchRequests';
 import { SEARCH_TYPE } from '../../../../utils/constants';
 import HTTPInput from '../../components/HTTPInput';
-import CustomWebhook from '../../../Destinations/components/createDestinations/CustomWebhook';
-import { URL_TYPE } from '../../../Destinations/containers/CreateDestination/utils/constants';
 
 function renderEmptyMessage(message) {
   return (
@@ -223,6 +221,7 @@ class DefineMonitor extends Component {
     const { dataTypes, response, performanceResponse } = this.state;
     const { index, searchType, timeField } = values;
     const isGraph = searchType === SEARCH_TYPE.GRAPH;
+    const isHTTP = searchType === SEARCH_TYPE.HTTP;
     let invalidJSON = false;
     try {
       JSON.parse(values.query);
@@ -240,18 +239,22 @@ class DefineMonitor extends Component {
 
     let content = renderEmptyMessage('You must specify an index.');
 
-    if (index.length) {
-      if (isGraph) {
-        content = timeField
-          ? this.renderGraph()
-          : renderEmptyMessage('You must specify a time field.');
-      } else {
-        content = (
-          <ExtractionQuery
-            response={JSON.stringify(response || '', null, 4)}
-            isDarkMode={this.isDarkMode}
-          />
-        );
+    if (isHTTP) {
+      content = <HTTPInput />;
+    } else {
+      if (index.length) {
+        if (isGraph) {
+          content = timeField
+            ? this.renderGraph()
+            : renderEmptyMessage('You must specify a time field.');
+        } else {
+          content = (
+            <ExtractionQuery
+              response={JSON.stringify(response || '', null, 4)}
+              isDarkMode={this.isDarkMode}
+            />
+          );
+        }
       }
     }
 
@@ -263,10 +266,9 @@ class DefineMonitor extends Component {
         actions={actions}
       >
         <MonitorDefinition resetResponse={this.resetResponse} />
-        {searchType === SEARCH_TYPE.HTTP && <HTTPInput />}
-        {!(searchType === SEARCH_TYPE.HTTP) && <MonitorIndex httpClient={httpClient} />}
+        {!isHTTP && <MonitorIndex httpClient={httpClient} />}
         {isGraph && <MonitorTimeField dataTypes={dataTypes} />}
-        {!(searchType === SEARCH_TYPE.HTTP) && <div style={{ padding: '0px 10px' }}>{content}</div>}
+        <div style={{ padding: '0px 10px' }}>{content}</div>
         <EuiSpacer size="m" />
         <QueryPerformance response={performanceResponse} />
       </ContentPanel>

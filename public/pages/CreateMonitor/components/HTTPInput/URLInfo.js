@@ -18,29 +18,84 @@ import {
   FormikFieldText,
   FormikSelect,
   FormikFieldNumber,
+  FormikFieldRadio,
 } from '../../../../components/FormControls';
+import { hasError, isInvalid } from '../../../../utils/validate';
+import { URL_TYPE } from '../../../Destinations/containers/CreateDestination/utils/constants';
 import { Formik } from 'formik';
 
 const protocolOptions = [{ value: 'HTTPS', text: 'HTTPS' }, { value: 'HTTP', text: 'HTTP' }];
+
 const initialValues = {
   url: '',
-  scheme: 'HTTPS',
+  scheme: 'HTTP',
   host: 'localhost',
   port: 9200,
   path: '',
 };
+
 const URLInfo = () => {
+  let isUrlEnabled = true;
   return (
     <Formik
-      initialValues={initialValues}
-      render={({}) => (
+      render={() => (
         <Fragment>
+          <FormikFieldRadio
+            name={`urlType`}
+            formRow
+            rowProps={{
+              style: { paddingLeft: '10px' },
+            }}
+            inputProps={{
+              id: 'fullUrl',
+              value: URL_TYPE.FULL_URL,
+              checked: isUrlEnabled,
+              label: 'Define endpoint by URL',
+              onChange: (e, field, form) => {
+                // Clear Full URL if user switched to custom URL
+                form.setFieldTouched(`url`, false, false);
+                form.setFieldValue(`url`, '');
+                isUrlEnabled = true;
+                field.onChange(e);
+              },
+            }}
+          />
           <FormikFieldText
             name="url"
             formRow
             rowProps={{
               label: 'URL',
               style: { paddingLeft: '10px' },
+              isInvalid,
+              error: hasError,
+            }}
+            inputProps={{
+              disabled: !isUrlEnabled,
+              isInvalid,
+            }}
+          />
+          <FormikFieldRadio
+            name={`urlType`}
+            formRow
+            rowProps={{
+              style: { paddingLeft: '10px' },
+            }}
+            inputProps={{
+              id: 'customUrl',
+              value: URL_TYPE.ATTRIBUTE_URL,
+              checked: !isUrlEnabled,
+              label: 'Define endpoint by custom attributes URL',
+              onChange: (e, field, form) => {
+                form.setTouched({
+                  scheme: false,
+                  host: false,
+                  port: false,
+                  path: false,
+                });
+                form.setValues(initialValues);
+                isUrlEnabled = false;
+                field.onChange(e);
+              },
             }}
           />
           <FormikSelect
@@ -51,6 +106,7 @@ const URLInfo = () => {
               style: { paddingLeft: '10px' },
             }}
             inputProps={{
+              disabled: isUrlEnabled,
               options: protocolOptions,
             }}
           />
@@ -60,6 +116,11 @@ const URLInfo = () => {
             rowProps={{
               label: 'Host',
               style: { paddingLeft: '10px' },
+              isInvalid,
+            }}
+            inputProps={{
+              disabled: isUrlEnabled,
+              isInvalid,
             }}
           />
           <FormikFieldNumber
@@ -68,6 +129,11 @@ const URLInfo = () => {
             rowProps={{
               label: 'Port',
               style: { paddingLeft: '10px' },
+              isInvalid,
+            }}
+            inputProps={{
+              disabled: isUrlEnabled,
+              isInvalid,
             }}
           />
           <FormikFieldText
@@ -76,6 +142,11 @@ const URLInfo = () => {
             rowProps={{
               label: 'Path',
               style: { paddingLeft: '10px' },
+              isInvalid,
+            }}
+            inputProps={{
+              disabled: isUrlEnabled,
+              isInvalid,
             }}
           />
         </Fragment>
