@@ -21,6 +21,10 @@ import {
   FormikFieldRadio,
 } from '../../../../components/FormControls';
 import { EuiCodeEditor, EuiFlexItem, EuiFormRow, EuiFlexGroup } from '@elastic/eui';
+import 'brace/mode/json';
+import 'brace/mode/plain_text';
+import 'brace/snippets/javascript';
+import 'brace/ext/language_tools';
 import { hasError, isInvalid } from '../../../../utils/validate';
 import { URL_TYPE } from '../../../Destinations/containers/CreateDestination/utils/constants';
 import { Formik } from 'formik';
@@ -156,13 +160,13 @@ const URLInfo = ({ isDarkMode, response }) => {
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFormRow label="Extraction query response" fullWidth>
+        <EuiFormRow label="HTTP response" fullWidth>
           <EuiCodeEditor
             mode="json"
             theme={isDarkMode ? 'sense-dark' : 'github'}
             width="100%"
             height="500px"
-            value="Hello"
+            value={response}
             readOnly
           />
         </EuiFormRow>

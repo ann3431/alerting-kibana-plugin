@@ -46,6 +46,8 @@ export function formikToMonitor(values) {
   };
 }
 
+export function formikToMonitorHttp(values) {}
+
 export function formikToUiSearch(values) {
   const {
     searchType,
