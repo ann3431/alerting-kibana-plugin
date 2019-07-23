@@ -278,6 +278,7 @@ class DefineMonitor extends Component {
         <HTTPInput
           response={JSON.stringify(response || '', null, 4)}
           isDarkMode={this.isDarkMode}
+          values={this.props.values}
         />
       );
     } else {

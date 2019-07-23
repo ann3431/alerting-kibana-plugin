@@ -46,7 +46,27 @@ export function formikToMonitor(values) {
   };
 }
 
-export function formikToMonitorHttp(values) {}
+export function formikToMonitorHttp(values) {
+  const uiSchedule = formikToUiSchedule(values);
+  const schedule = buildSchedule(values.frequency, uiSchedule);
+  const uiSearch = formikToUiSearch(values);
+  return {
+    name: values.name,
+    type: 'monitor',
+    enabled: !values.disabled,
+    schedule,
+    inputs: [
+      {
+        http: {},
+      },
+    ],
+    triggers: [],
+    ui_metadata: {
+      schedule: uiSchedule,
+      search: uiSearch,
+    },
+  };
+}
 
 export function formikToUiSearch(values) {
   const {
