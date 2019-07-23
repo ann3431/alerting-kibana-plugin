@@ -48,7 +48,6 @@ const propTypes = {
 const QueryParamsEditor = ({ queryParams }) => (
   <FieldArray
     name={`queryParams`}
-    validateOnChange={true}
     render={arrayHelpers => (
       <AttributeEditor
         titleText="Query parameters"

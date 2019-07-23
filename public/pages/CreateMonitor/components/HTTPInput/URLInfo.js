@@ -28,6 +28,7 @@ import 'brace/ext/language_tools';
 import { hasError, isInvalid } from '../../../../utils/validate';
 import { URL_TYPE } from '../../../Destinations/containers/CreateDestination/utils/constants';
 import { Formik } from 'formik';
+import { validateHost } from '../../../Destinations/components/createDestinations/CustomWebhook/validate';
 
 const protocolOptions = [{ value: 'HTTPS', text: 'HTTPS' }, { value: 'HTTP', text: 'HTTP' }];
 
@@ -39,7 +40,7 @@ const initialValues = {
   path: '',
 };
 
-const URLInfo = ({ isDarkMode, response }) => {
+const URLInfo = ({ isDarkMode, response, values, type }) => {
   let isUrlEnabled = true;
   return (
     <EuiFlexGroup>
@@ -65,6 +66,7 @@ const URLInfo = ({ isDarkMode, response }) => {
                         path: false,
                       });
                       isUrlEnabled = true;
+                      form.setValues(initialValues);
                     }
                     field.onChange(e);
                   },
@@ -99,7 +101,7 @@ const URLInfo = ({ isDarkMode, response }) => {
                       form.setFieldTouched(`url`, false, false);
                       form.setFieldValue(`url`, '');
                     }
-
+                    isUrlEnabled = false;
                     field.onChange(e);
                   },
                 }}

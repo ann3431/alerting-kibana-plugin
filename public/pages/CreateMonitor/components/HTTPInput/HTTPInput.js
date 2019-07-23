@@ -18,9 +18,9 @@ import { EuiSpacer } from '@elastic/eui';
 import URLInfo from './URLInfo';
 import QueryParamsEditor from './QueryParamsEditor';
 
-const HTTPInput = ({ isDarkMode, response, values }) => (
+const HTTPInput = ({ isDarkMode, response, values, type }) => (
   <div>
-    <URLInfo isDarkMode={isDarkMode} response={response} />
+    <URLInfo isDarkMode={isDarkMode} response={response} values={values} type={type} />
     <EuiSpacer size="m" />
     <QueryParamsEditor queryParams={values.queryParams} />
   </div>
