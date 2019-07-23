@@ -20,6 +20,7 @@ import {
   FormikFieldNumber,
   FormikFieldRadio,
 } from '../../../../components/FormControls';
+import { EuiCodeEditor, EuiFlexItem, EuiFormRow, EuiFlexGroup } from '@elastic/eui';
 import { hasError, isInvalid } from '../../../../utils/validate';
 import { URL_TYPE } from '../../../Destinations/containers/CreateDestination/utils/constants';
 import { Formik } from 'formik';
@@ -34,124 +35,139 @@ const initialValues = {
   path: '',
 };
 
-const URLInfo = () => {
+const URLInfo = ({ isDarkMode, response }) => {
   let isUrlEnabled = true;
   return (
-    <Formik
-      render={() => (
-        <Fragment>
-          <FormikFieldRadio
-            name={`urlType`}
-            formRow
-            rowProps={{
-              style: { paddingLeft: '10px' },
-            }}
-            inputProps={{
-              id: 'fullUrl',
-              value: URL_TYPE.FULL_URL,
-              checked: isUrlEnabled,
-              label: 'Define endpoint by URL',
-              onChange: (e, field, form) => {
-                // Clear Full URL if user switched to custom URL
-                form.setFieldTouched(`url`, false, false);
-                form.setFieldValue(`url`, '');
-                isUrlEnabled = true;
-                field.onChange(e);
-              },
-            }}
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <Formik
+          render={() => (
+            <Fragment>
+              <FormikFieldRadio
+                name={`urlType`}
+                formRow
+                inputProps={{
+                  id: 'fullUrl',
+                  value: URL_TYPE.FULL_URL,
+                  checked: isUrlEnabled,
+                  label: 'Define endpoint by URL',
+                  onChange: (e, field, form) => {
+                    // Clear Custom URL if user switched to custom URL
+                    if (field.value === URL_TYPE.ATTRIBUTE_URL) {
+                      form.setTouched({
+                        scheme: false,
+                        host: false,
+                        port: false,
+                        path: false,
+                      });
+                      isUrlEnabled = true;
+                    }
+                    field.onChange(e);
+                  },
+                }}
+              />
+              <FormikFieldText
+                name="url"
+                formRow
+                rowProps={{
+                  label: 'URL',
+                  style: { paddingLeft: '10px' },
+                  isInvalid,
+                  error: hasError,
+                }}
+                inputProps={{
+                  disabled: !isUrlEnabled,
+                  isInvalid,
+                }}
+              />
+              <FormikFieldRadio
+                name={`urlType`}
+                formRow
+                inputProps={{
+                  id: 'customUrl',
+                  value: URL_TYPE.ATTRIBUTE_URL,
+                  checked: !isUrlEnabled,
+                  label: 'Define endpoint by custom attributes URL',
+                  onChange: (e, field, form) => {
+                    form.setValues(initialValues);
+                    isUrlEnabled = false;
+                    if (field.value === URL_TYPE.FULL_URL) {
+                      form.setFieldTouched(`url`, false, false);
+                      form.setFieldValue(`url`, '');
+                    }
+
+                    field.onChange(e);
+                  },
+                }}
+              />
+              <FormikSelect
+                name={`scheme`}
+                formRow
+                rowProps={{
+                  label: 'Type',
+                  style: { paddingLeft: '10px' },
+                }}
+                inputProps={{
+                  disabled: isUrlEnabled,
+                  options: protocolOptions,
+                }}
+              />
+              <FormikFieldText
+                name="host"
+                formRow
+                rowProps={{
+                  label: 'Host',
+                  style: { paddingLeft: '10px' },
+                  isInvalid,
+                }}
+                inputProps={{
+                  disabled: isUrlEnabled,
+                  isInvalid,
+                }}
+              />
+              <FormikFieldNumber
+                name="port"
+                formRow
+                rowProps={{
+                  label: 'Port',
+                  style: { paddingLeft: '10px' },
+                  isInvalid,
+                }}
+                inputProps={{
+                  disabled: isUrlEnabled,
+                  isInvalid,
+                }}
+              />
+              <FormikFieldText
+                name="path"
+                formRow
+                rowProps={{
+                  label: 'Path',
+                  style: { paddingLeft: '10px' },
+                  isInvalid,
+                }}
+                inputProps={{
+                  disabled: isUrlEnabled,
+                  isInvalid,
+                }}
+              />
+            </Fragment>
+          )}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFormRow label="Extraction query response" fullWidth>
+          <EuiCodeEditor
+            mode="json"
+            theme={isDarkMode ? 'sense-dark' : 'github'}
+            width="100%"
+            height="500px"
+            value="Hello"
+            readOnly
           />
-          <FormikFieldText
-            name="url"
-            formRow
-            rowProps={{
-              label: 'URL',
-              style: { paddingLeft: '10px' },
-              isInvalid,
-              error: hasError,
-            }}
-            inputProps={{
-              disabled: !isUrlEnabled,
-              isInvalid,
-            }}
-          />
-          <FormikFieldRadio
-            name={`urlType`}
-            formRow
-            rowProps={{
-              style: { paddingLeft: '10px' },
-            }}
-            inputProps={{
-              id: 'customUrl',
-              value: URL_TYPE.ATTRIBUTE_URL,
-              checked: !isUrlEnabled,
-              label: 'Define endpoint by custom attributes URL',
-              onChange: (e, field, form) => {
-                form.setTouched({
-                  scheme: false,
-                  host: false,
-                  port: false,
-                  path: false,
-                });
-                form.setValues(initialValues);
-                isUrlEnabled = false;
-                field.onChange(e);
-              },
-            }}
-          />
-          <FormikSelect
-            name={`scheme`}
-            formRow
-            rowProps={{
-              label: 'Type',
-              style: { paddingLeft: '10px' },
-            }}
-            inputProps={{
-              disabled: isUrlEnabled,
-              options: protocolOptions,
-            }}
-          />
-          <FormikFieldText
-            name="host"
-            formRow
-            rowProps={{
-              label: 'Host',
-              style: { paddingLeft: '10px' },
-              isInvalid,
-            }}
-            inputProps={{
-              disabled: isUrlEnabled,
-              isInvalid,
-            }}
-          />
-          <FormikFieldNumber
-            name="port"
-            formRow
-            rowProps={{
-              label: 'Port',
-              style: { paddingLeft: '10px' },
-              isInvalid,
-            }}
-            inputProps={{
-              disabled: isUrlEnabled,
-              isInvalid,
-            }}
-          />
-          <FormikFieldText
-            name="path"
-            formRow
-            rowProps={{
-              label: 'Path',
-              style: { paddingLeft: '10px' },
-              isInvalid,
-            }}
-            inputProps={{
-              disabled: isUrlEnabled,
-              isInvalid,
-            }}
-          />
-        </Fragment>
-      )}
-    />
+        </EuiFormRow>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 

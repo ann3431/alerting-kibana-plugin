@@ -17,9 +17,9 @@ import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import URLInfo from './URLInfo';
 
-const HTTPInput = () => (
+const HTTPInput = (isDarkMode, response) => (
   <div>
-    <URLInfo />
+    <URLInfo isDarkMode={isDarkMode} response={response} />
     <EuiSpacer size="m" />
   </div>
 );

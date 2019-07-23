@@ -240,7 +240,7 @@ class DefineMonitor extends Component {
     let content = renderEmptyMessage('You must specify an index.');
 
     if (isHTTP) {
-      content = <HTTPInput />;
+      content = <HTTPInput isDarkMode={this.isDarkMode} response={response} />;
     } else {
       if (index.length) {
         if (isGraph) {
