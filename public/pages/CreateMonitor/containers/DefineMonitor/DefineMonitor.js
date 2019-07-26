@@ -187,6 +187,39 @@ class DefineMonitor extends Component {
     }
   }
 
+  async onRunHttp() {
+    const { httpClient, values } = this.props;
+    const formikSnapshot = _.cloneDeep(values);
+
+    try {
+      const promises = searchRequests.map(searchRequest => {
+        // Fill in monitor name in case it's empty (in create workflow)
+        // Set triggers to empty array so they are not executed (if in edit workflow)
+        // Set input search to query/graph query and then use execute API to fill in period_start/period_end
+        const monitor = formikToMonitor(values);
+        _.set(monitor, 'name', 'TEMP_MONITOR');
+        _.set(monitor, 'triggers', []);
+        _.set(monitor, 'inputs[0].http', searchRequest);
+        return httpClient.post('../api/alerting/monitors/_execute', monitor);
+      });
+
+      const [queryResponse, optionalResponse] = await Promise.all(promises);
+
+      if (queryResponse.data.ok) {
+        const response = _.get(queryResponse.data.resp, 'input_results.results[0]');
+        // If there is an optionalResponse use it's results, otherwise use the original response
+        const performanceResponse = optionalResponse
+          ? _.get(optionalResponse, 'data.resp.input_results.results[0]', null)
+          : response;
+        this.setState({ response, formikSnapshot, performanceResponse });
+      } else {
+        console.error('There was an error running the query', queryResponse.data.resp);
+        this.setState({ response: null, formikSnapshot: null, performanceResponse: null });
+      }
+    } catch (err) {
+      console.error('There was an error running the query', err);
+    }
+  }
   resetResponse() {
     this.setState({ response: null, performanceResponse: null });
   }
@@ -215,40 +248,6 @@ class DefineMonitor extends Component {
       return {};
     } catch (err) {
       throw err;
-    }
-  }
-
-  async onRunHttp() {
-    const { httpClient, values } = this.props;
-    const formikSnapshot = _.cloneDeep(values);
-
-    try {
-      const promises = searchRequests.map(searchRequest => {
-        // Fill in monitor name in case it's empty (in create workflow)
-        // Set triggers to empty array so they are not executed (if in edit workflow)
-        // Set input search to query/graph query and then use execute API to fill in period_start/period_end
-        const monitor = formikToMonitorHTTP(values);
-        _.set(monitor, 'name', 'TEMP_MONITOR');
-        _.set(monitor, 'triggers', []);
-        _.set(monitor, 'inputs[0].http', searchRequest);
-        return httpClient.post('../api/alerting/monitors/_execute', monitor);
-      });
-
-      const [queryResponse, optionalResponse] = await Promise.all(promises);
-
-      if (queryResponse.data.ok) {
-        const response = _.get(queryResponse.data.resp, 'input_results.results[0]');
-        // If there is an optionalResponse use it's results, otherwise use the original response
-        const performanceResponse = optionalResponse
-          ? _.get(optionalResponse, 'data.resp.input_results.results[0]', null)
-          : response;
-        this.setState({ response, formikSnapshot, performanceResponse });
-      } else {
-        console.error('There was an error running the query', queryResponse.data.resp);
-        this.setState({ response: null, formikSnapshot: null, performanceResponse: null });
-      }
-    } catch (err) {
-      console.error('There was an error running the query', err);
     }
   }
 

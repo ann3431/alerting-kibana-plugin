@@ -52,7 +52,7 @@ const QueryParamsEditor = ({ queryParams }) => (
         onAdd={() => arrayHelpers.push({})}
         onRemove={index => arrayHelpers.remove(index)}
         items={queryParams}
-        name={`queryParams`}
+        name={`http.queryParams`}
         addButtonText="Add parameter"
         removeButtonText="Remove parameter"
         onRenderKeyField={handleRenderKeyField}

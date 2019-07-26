@@ -31,7 +31,7 @@ export const APP_PATH = {
 export const SEARCH_TYPE = {
   GRAPH: 'graph',
   QUERY: 'query',
-  HTTP: 'HTTP',
+  HTTP: 'http',
 };
 
 export const DESTINATION_ACTIONS = {

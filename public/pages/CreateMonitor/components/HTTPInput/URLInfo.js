@@ -28,11 +28,6 @@ import { hasError, isInvalid } from '../../../../utils/validate';
 import { EuiSpacer } from '@elastic/eui';
 import { URL_TYPE } from '../../../Destinations/containers/CreateDestination/utils/constants';
 
-import {
-  validateHost,
-  validateUrl,
-} from '../../../Destinations/components/createDestinations/CustomWebhook/validate';
-
 const protocolOptions = [{ value: 'https', text: 'HTTPS' }, { value: 'http', text: 'HTTP' }];
 
 const URLInfo = ({ values }) => {
@@ -68,7 +63,6 @@ const URLInfo = ({ values }) => {
               });
               form.setValues(customValues);
             }
-            isUrlEnabled = true;
             field.onChange(e);
           },
         }}
@@ -100,7 +94,6 @@ const URLInfo = ({ values }) => {
               form.setFieldTouched(`http.url`, false, false);
               form.setFieldValue(`http.url`, '');
             }
-            isUrlEnabled = false;
             field.onChange(e);
           },
         }}
@@ -128,6 +121,9 @@ const URLInfo = ({ values }) => {
         inputProps={{
           disabled: isUrlEnabled,
           isInvalid,
+          onFocus: (e, field, form) => {
+            form.setFieldError(`http.host`, undefined);
+          },
         }}
       />
       <FormikFieldNumber

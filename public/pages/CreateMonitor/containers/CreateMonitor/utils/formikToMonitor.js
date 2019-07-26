@@ -57,13 +57,20 @@ export function formikToSearch(values) {
 
 export function formikToHttp(values) {
   const { connection_timeout, socket_timeout } = values;
+  const updatedQueryParams = values.http.queryParams.reduce(
+    (acc, { key, value }) => ({
+      ...acc,
+      [key]: value,
+    }),
+    {}
+  );
   return {
     http: {
       scheme: values.http.scheme,
       host: values.http.host,
       port: values.http.port,
       path: values.http.path,
-      queryParams: values.http.queryParams,
+      params: updatedQueryParams,
       url: values.http.url,
       connection_timeout,
       socket_timeout,
