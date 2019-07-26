@@ -14,15 +14,58 @@
  */
 
 import React from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiFlexItem, EuiFlexGroup, EuiCodeEditor, EuiFormRow } from '@elastic/eui';
 import URLInfo from './URLInfo';
 import QueryParamsEditor from './QueryParamsEditor';
+import { FormikFieldNumber } from '../../../../components/FormControls';
+import { isInvalid } from '../../../../utils/validate';
 
-const HTTPInput = ({ isDarkMode, response, values, type }) => (
+const HTTPInput = ({ isDarkMode, response, values }) => (
   <div>
-    <URLInfo isDarkMode={isDarkMode} response={response} values={values} type={type} />
-    <EuiSpacer size="m" />
-    <QueryParamsEditor queryParams={values.queryParams} />
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <URLInfo isDarkMode={isDarkMode} response={response} values={values} />
+        <EuiSpacer size="m" />
+        <QueryParamsEditor queryParams={values.http.queryParams} />
+        <EuiSpacer size="m" />
+        <FormikFieldNumber
+          name="connection_timeout"
+          formRow
+          rowProps={{
+            label: 'Connection Timeout(s)',
+            style: { paddingLeft: '10px' },
+            isInvalid,
+          }}
+          inputProps={{
+            isInvalid,
+          }}
+        />
+        <FormikFieldNumber
+          name="socket_timeout"
+          formRow
+          rowProps={{
+            label: 'Socket Timeout(s)',
+            style: { paddingLeft: '10px' },
+            isInvalid,
+          }}
+          inputProps={{
+            isInvalid,
+          }}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFormRow label="HTTP response" fullWidth>
+          <EuiCodeEditor
+            mode="json"
+            theme={isDarkMode ? 'sense-dark' : 'github'}
+            width="100%"
+            height="500px"
+            value={response}
+            readOnly
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   </div>
 );
 

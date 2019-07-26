@@ -84,6 +84,8 @@ class DefineMonitor extends Component {
   }
 
   componentDidUpdate(prevProps) {
+    console.log('values', this.props.values);
+    console.log('formik', formikToMonitor(this.props.values));
     const {
       searchType: prevSearchType,
       index: prevIndex,
@@ -225,7 +227,7 @@ class DefineMonitor extends Component {
         // Fill in monitor name in case it's empty (in create workflow)
         // Set triggers to empty array so they are not executed (if in edit workflow)
         // Set input search to query/graph query and then use execute API to fill in period_start/period_end
-        const monitor = formikToMonitor(values);
+        const monitor = formikToMonitorHTTP(values);
         _.set(monitor, 'name', 'TEMP_MONITOR');
         _.set(monitor, 'triggers', []);
         _.set(monitor, 'inputs[0].http', searchRequest);
@@ -310,7 +312,7 @@ class DefineMonitor extends Component {
         {isGraph && <MonitorTimeField dataTypes={dataTypes} />}
         <div style={{ padding: '0px 10px' }}>{content}</div>
         <EuiSpacer size="m" />
-        <QueryPerformance response={performanceResponse} />
+        {!isHTTP && <QueryPerformance response={performanceResponse} />}
       </ContentPanel>
     );
   }

@@ -18,7 +18,6 @@ import PropTypes from 'prop-types';
 import { FieldArray } from 'formik';
 import FormikFieldText from '../../../../components/FormControls/FormikFieldText';
 import AttributeEditor from '../../../../components/AttributeEditor';
-import { isInvalid, required } from '../../../../utils/validate';
 
 const handleRenderKeyField = (fieldName, index) => (
   <FormikFieldText
@@ -41,13 +40,12 @@ const handleRenderValueField = (fieldName, index) => (
 );
 
 const propTypes = {
-  type: PropTypes.string.isRequired,
   queryParams: PropTypes.array.isRequired,
 };
 
 const QueryParamsEditor = ({ queryParams }) => (
   <FieldArray
-    name={`queryParams`}
+    name={`http.queryParams`}
     render={arrayHelpers => (
       <AttributeEditor
         titleText="Query parameters"
