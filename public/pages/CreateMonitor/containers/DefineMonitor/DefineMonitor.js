@@ -31,6 +31,8 @@ import { getPathsPerDataType } from './utils/mappings';
 import { buildSearchRequest } from './utils/searchRequests';
 import { SEARCH_TYPE } from '../../../../utils/constants';
 import HTTPInput from '../../components/HTTPInput';
+import { URL_TYPE } from '../../../Destinations/containers/CreateDestination/utils/constants';
+import { buildHTTPRequest } from './utils/httpRequests';
 
 function renderEmptyMessage(message) {
   return (
@@ -66,6 +68,7 @@ class DefineMonitor extends Component {
 
     this.renderGraph = this.renderGraph.bind(this);
     this.onRunQuery = this.onRunQuery.bind(this);
+    this.onRunHttp = this.onRunHttp.bind(this);
     this.resetResponse = this.resetResponse.bind(this);
     this.onQueryMappings = this.onQueryMappings.bind(this);
     this.queryMappings = this.queryMappings.bind(this);
@@ -84,8 +87,6 @@ class DefineMonitor extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    console.log('values', this.props.values);
-    console.log('formik', formikToMonitor(this.props.values));
     const {
       searchType: prevSearchType,
       index: prevIndex,
@@ -191,35 +192,37 @@ class DefineMonitor extends Component {
     const { httpClient, values } = this.props;
     const formikSnapshot = _.cloneDeep(values);
 
+    const httpRequests = [buildHTTPRequest(values)];
     try {
-      const promises = searchRequests.map(searchRequest => {
+      const promises = httpRequests.map(httpRequest => {
         // Fill in monitor name in case it's empty (in create workflow)
         // Set triggers to empty array so they are not executed (if in edit workflow)
         // Set input search to query/graph query and then use execute API to fill in period_start/period_end
         const monitor = formikToMonitor(values);
         _.set(monitor, 'name', 'TEMP_MONITOR');
         _.set(monitor, 'triggers', []);
-        _.set(monitor, 'inputs[0].http', searchRequest);
+        _.set(monitor, 'inputs[0].http', httpRequest);
         return httpClient.post('../api/alerting/monitors/_execute', monitor);
       });
 
-      const [queryResponse, optionalResponse] = await Promise.all(promises);
+      const [httpResponse, optionalResponse] = await Promise.all(promises);
 
-      if (queryResponse.data.ok) {
-        const response = _.get(queryResponse.data.resp, 'input_results.results[0]');
+      if (httpResponse.data.ok) {
+        const response = _.get(httpResponse.data.resp, 'input_results.results[0]');
         // If there is an optionalResponse use it's results, otherwise use the original response
         const performanceResponse = optionalResponse
           ? _.get(optionalResponse, 'data.resp.input_results.results[0]', null)
           : response;
         this.setState({ response, formikSnapshot, performanceResponse });
       } else {
-        console.error('There was an error running the query', queryResponse.data.resp);
+        console.error('There was an error running the query', httpResponse.data.resp);
         this.setState({ response: null, formikSnapshot: null, performanceResponse: null });
       }
     } catch (err) {
       console.error('There was an error running the query', err);
     }
   }
+
   resetResponse() {
     this.setState({ response: null, performanceResponse: null });
   }
@@ -257,17 +260,22 @@ class DefineMonitor extends Component {
     const { index, searchType, timeField } = values;
     const isGraph = searchType === SEARCH_TYPE.GRAPH;
     const isHTTP = searchType === SEARCH_TYPE.HTTP;
+    // Definition of when the "run" button should be disabled for HTTP type.
+    const disableHTTP =
+      (isHTTP && (values.http.urlType === URL_TYPE.FULL_URL && !values.http.url)) ||
+      (values.http.urlType === URL_TYPE.ATTRIBUTE_URL && !values.http.host);
     let invalidJSON = false;
     try {
       JSON.parse(values.query);
     } catch (e) {
       invalidJSON = true;
     }
-    const runIsDisabled = invalidJSON || !values.index.length;
+
+    const runIsDisabled = invalidJSON || (!isHTTP && !values.index.length) || disableHTTP;
     const actions = isGraph
       ? []
       : [
-          <EuiButton disabled={runIsDisabled} onClick={this.onRunQuery}>
+          <EuiButton disabled={runIsDisabled} onClick={isHTTP ? this.onRunHttp : this.onRunQuery}>
             Run
           </EuiButton>,
         ];

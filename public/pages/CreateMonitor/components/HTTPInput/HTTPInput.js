@@ -19,6 +19,7 @@ import URLInfo from './URLInfo';
 import QueryParamsEditor from './QueryParamsEditor';
 import { FormikFieldNumber } from '../../../../components/FormControls';
 import { isInvalid } from '../../../../utils/validate';
+import { URL_TYPE } from '../../../Destinations/containers/CreateDestination/utils/constants';
 
 const HTTPInput = ({ isDarkMode, response, values }) => (
   <div>
@@ -26,7 +27,9 @@ const HTTPInput = ({ isDarkMode, response, values }) => (
       <EuiFlexItem>
         <URLInfo isDarkMode={isDarkMode} response={response} values={values} />
         <EuiSpacer size="m" />
-        <QueryParamsEditor queryParams={values.http.queryParams} />
+        {values.http.urlType === URL_TYPE.ATTRIBUTE_URL && (
+          <QueryParamsEditor queryParams={values.http.queryParams} />
+        )}
         <EuiSpacer size="m" />
         <FormikFieldNumber
           name="connection_timeout"

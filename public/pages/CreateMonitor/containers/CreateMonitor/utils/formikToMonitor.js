@@ -21,8 +21,9 @@ import { OPERATORS_QUERY_MAP } from './whereFilters';
 import { URL_TYPE } from '../../../../Destinations/containers/CreateDestination/utils/constants';
 
 export function formikToMonitor(values) {
-  const input =
-    values.searchType === SEARCH_TYPE.HTTP ? formikToHttp(values) : formikToSearch(values);
+  const isHttp = values.searchType === SEARCH_TYPE.HTTP;
+  const http = formikToHttp(values);
+  const search = formikToSearch(values);
   const uiSchedule = formikToUiSchedule(values);
   const schedule = buildSchedule(values.frequency, uiSchedule);
   const uiSearch = formikToUiSearch(values);
@@ -31,11 +32,7 @@ export function formikToMonitor(values) {
     type: 'monitor',
     enabled: !values.disabled,
     schedule,
-    inputs: [
-      {
-        input,
-      },
-    ],
+    inputs: [isHttp ? http : search],
     triggers: [],
     ui_metadata: {
       schedule: uiSchedule,
@@ -56,6 +53,23 @@ export function formikToSearch(values) {
 }
 
 export function formikToHttp(values) {
+  const http =
+    values.http.urlType === URL_TYPE.FULL_URL ? formikToFullUrl(values) : formikToCustomUrl(values);
+  return {
+    http,
+  };
+}
+
+export function formikToFullUrl(values) {
+  const { connection_timeout, socket_timeout } = values;
+  return {
+    url: values.http.url,
+    connection_timeout,
+    socket_timeout,
+  };
+}
+
+export function formikToCustomUrl(values) {
   const { connection_timeout, socket_timeout } = values;
   const updatedQueryParams = values.http.queryParams.reduce(
     (acc, { key, value }) => ({
@@ -65,16 +79,13 @@ export function formikToHttp(values) {
     {}
   );
   return {
-    http: {
-      scheme: values.http.scheme,
-      host: values.http.host,
-      port: values.http.port,
-      path: values.http.path,
-      params: updatedQueryParams,
-      url: values.http.url,
-      connection_timeout,
-      socket_timeout,
-    },
+    scheme: values.http.scheme,
+    host: values.http.host,
+    port: values.http.port,
+    path: values.http.path,
+    params: updatedQueryParams,
+    connection_timeout,
+    socket_timeout,
   };
 }
 
